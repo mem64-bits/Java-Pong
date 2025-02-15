@@ -8,7 +8,11 @@ public class Main {
     public static void main(String[] args){
         // Sets up java swing window object
         JFrame window  = new JFrame("Java Pong");
-
+        
+        //Changes window icon to custom icon of choice
+        ImageIcon icon = new ImageIcon("icons/ping-pong.png");
+        
+        window.setIconImage(icon.getImage());
         // Sets up window exiting
         window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		

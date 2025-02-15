@@ -29,6 +29,9 @@ public class PongGame extends JPanel implements MouseMotionListener{
     
     // Variable to load Special font
     private Font game_font;
+
+    // Line seperating player and cpu
+    private Line line;
      
 
     /*Method handling games physics , called each frame */
@@ -45,6 +48,7 @@ public class PongGame extends JPanel implements MouseMotionListener{
 
         if(playerPaddle.checkCollision(gameBall) || cpuPaddle.checkCollision(gameBall)){
             gameBall.reverseX();
+            gameBall.randomBallColour();
             bounceCount++;
         }
 
@@ -73,8 +77,12 @@ public class PongGame extends JPanel implements MouseMotionListener{
     public PongGame(){
         // Instantiates instances of needed game objects
         gameBall = new Ball(300, 200, 6, 6, 3, Color.WHITE, 10);
-        playerPaddle = new Paddle(10,200,65,5,Color.BLUE);
-        cpuPaddle = new Paddle(610,200,65,5,Color.RED);
+        playerPaddle = new Paddle(10,200,65,6,Color.WHITE);
+        cpuPaddle = new Paddle(610,200,65,6,Color.WHITE);   
+
+        // Draws line seperating player and cpu
+        line = new Line(WINDOW_WIDTH / 2, 0, WINDOW_HEIGHT, 3, Color.WHITE);
+
         playerMouseY = 0;
         playerScore = 0; 
         cpuScore = 0;
@@ -85,7 +93,7 @@ public class PongGame extends JPanel implements MouseMotionListener{
 
         // Exception to handle loading font
         try {
-            game_font = Font.createFont(Font.TRUETYPE_FONT, new File("fonts/MGS2MENU.TTF")).deriveFont(32f);
+            game_font = Font.createFont(Font.TRUETYPE_FONT, new File("fonts/MGS2MENU.TTF")).deriveFont(28f);
             GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
             ge.registerFont(game_font);
         } catch (IOException | FontFormatException e) {
@@ -105,18 +113,20 @@ public class PongGame extends JPanel implements MouseMotionListener{
         covering whole screen */ 
         g.fillRect(0,0,WINDOW_WIDTH,WINDOW_HEIGHT);
 
-        //Draws a coloured ball 
+        // Draws a coloured ball 
         gameBall.paint(g);
-         //draw the paddles
+        // Draws the paddles
         playerPaddle.paint(g);
         cpuPaddle.paint(g);
+        // Draws line
+        line.drawLine(g);
 
         
         // update score
         g.setColor(Color.WHITE);
         g.setFont(game_font);
         // the drawString method needs a String to print, and a location to print it at.
-        g.drawString(playerScore + " - " + cpuScore, 250, 20   );
+        g.drawString(playerScore +"  "+ cpuScore,255 , 35);
     }
 
   // Overides built in methods for MouseEvent  

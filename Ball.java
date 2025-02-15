@@ -1,5 +1,6 @@
 // Library for handling colour change, and more
 import java.awt.*;
+import java.util.Random;
 
 /*Class for creating Pong ball and controls 
 its properties and behaviours*/
@@ -47,10 +48,12 @@ public class Ball {
     public void bounceOffEdges(int top, int bottom){ 
         // Checks if  Y is at the bottom of screen
         if(y > bottom - size){
+            randomBallColour();
             reverseY();
         }
         // Checks if y is at the top of screen
         else if(y < top){
+            randomBallColour();
             reverseY();
         }
     }
@@ -109,5 +112,12 @@ public class Ball {
             dx = (dx / Math.abs(dx)*speed);
             dy = (dy / Math.abs(dy)*speed);
         }
+    }
+
+    public void randomBallColour(){
+        Random rand = new Random();
+        Color[] colors = {Color.GREEN,Color.RED,Color.YELLOW,Color.ORANGE,Color.PINK};
+        int rand_colour = rand.nextInt(colors.length);
+        color = colors[rand_colour];
     }
 }

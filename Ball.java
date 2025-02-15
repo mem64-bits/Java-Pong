@@ -5,7 +5,6 @@ import java.awt.*;
 its properties and behaviours*/
 
 public class Ball {
-
     // Member variables for controlling ball attributes
     
     /*dy,dx = the rate the ball is moving across 
@@ -14,6 +13,8 @@ public class Ball {
 
     int x, y, dx, dy, size, speed;
     private Color color;
+    // Maximium speed ball can increase to
+    static final int MAX_SPEED = 12;
 
     // Ball Constructor, for initilizing instance of Ball object
     public Ball(int x, int y, int dx, int dy, int speed, Color color, int size){
@@ -52,13 +53,6 @@ public class Ball {
         else if(y < top){
             reverseY();
         }
-
-        if(x < 0){
-            reverseX();
-        }
-        else if(x > 640 - size){
-            reverseX();
-        }
     }
 
     // Methods for reversing (x,y) of ball 
@@ -75,8 +69,45 @@ public class Ball {
         return x;
     }
 
+    public void setX(int x){
+        this.x = x;
+    }
+
+    public void setY(int y){
+        this.y = y;
+    }
+
     public int getY(){
         return y;
     }
+
+    public int getSize(){
+        return size;
+    }
     
+    public int getSpeed(){
+        return speed;
+    }
+
+    public void setSpeed(int speed){
+        this.speed = speed; 
+    }
+
+    public void setDx(int dx){
+        this.dx = dx;
+    }
+
+    public void setDy(int dy){
+        this.dy = dy;
+    }
+
+    public void increaseSpeed(){
+        if(speed < MAX_SPEED){
+            //increase the speed by one
+            speed ++;
+            //update cy and cx with the new speed
+            dx = (dx / Math.abs(dx)*speed);
+            dy = (dy / Math.abs(dy)*speed);
+        }
+    }
 }

@@ -18,17 +18,14 @@ public class Main {
 
         // Instantiates PongGame object
         PongGame game = new PongGame();
-        //Instantiates Input Class
-        Input playerInput = new Input();
-        window.addKeyListener(playerInput);
         // adds the extended PongGame class to JFrame
         window.add(game);
 
 		// shows the window
         window.setVisible(true);
 
-        // Sets up timer to repeat at 30fps (33 mils a second)
-        Timer timer = new Timer (33, new ActionListener() {
+        // Sets up timer to repeat at around 60 fps (60fps is 16.67 mils a second)
+        Timer timer = new Timer (16, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e){  
                 //updates game logic and physics

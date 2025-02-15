@@ -8,7 +8,6 @@ public class Paddle {
     static final int PADDLE_WIDTH = 12;
 
     // Constructor for Paddle Class
-
     public Paddle(int x, int y, int height,int speed, Color color){
         this.x = x;
         this.y = y;
@@ -45,4 +44,23 @@ public class Paddle {
 
         }
     }
+
+    public boolean checkCollision(Ball b){
+
+        int rightX = x + PADDLE_WIDTH;
+        int bottomY = y + height;
+    
+        //check if the Ball is between the x values
+        if(b.getX() > (x - b.getSize()) && b.getX() < rightX){
+            //check if Ball is between the y values
+            if(b.getY() > y && b.getY() < bottomY){
+                //if we get here, we know the ball and the paddle have collided
+                return true;
+            }
+        }
+
+        //if we get here, one of the checks failed, and the ball has not collided
+        return false;
+    }
+    
 }

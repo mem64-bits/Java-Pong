@@ -13,7 +13,7 @@ public class PongGame extends JPanel implements MouseMotionListener{
     static final int WINDOW_WIDTH = 640, WINDOW_HEIGHT = 480;
     
     // Sets up a Ball object to be created
-    private Ball gameBall;
+    private Ball gameBall, futureBall;
     
     // Sets up player and CPU paddle
     private Paddle playerPaddle, cpuPaddle;
@@ -32,6 +32,11 @@ public class PongGame extends JPanel implements MouseMotionListener{
 
     // Line seperating player and cpu
     private Line line;
+
+    private int detectedCollideY; //the location we think the ball will collide with the PC's paddle
+    private boolean cpuGotToTarget; //whether or not the PC has reached the target paddle location
+
+    
      
 
     /*Method handling games physics , called each frame */
@@ -48,7 +53,7 @@ public class PongGame extends JPanel implements MouseMotionListener{
 
         if(playerPaddle.checkCollision(gameBall) || cpuPaddle.checkCollision(gameBall)){
             gameBall.reverseX();
-            gameBall.randomBallColour();
+            //gameBall.randomBallColour();
             bounceCount++;
         }
 
@@ -76,7 +81,11 @@ public class PongGame extends JPanel implements MouseMotionListener{
     // Creates constructor for PongGame
     public PongGame(){
         // Instantiates instances of needed game objects
-        gameBall = new Ball(300, 200, 6, 6, 3, Color.WHITE, 10);
+        gameBall = new Ball(300, 200, 5, 5, 3, Color.WHITE, 10);
+
+         //futureBall is a clone of gameBall, but with a dark gray color
+         // usually invisible
+        futureBall = new Ball(gameBall);
         playerPaddle = new Paddle(10,200,65,6,Color.WHITE);
         cpuPaddle = new Paddle(610,200,65,6,Color.WHITE);   
 
@@ -115,16 +124,17 @@ public class PongGame extends JPanel implements MouseMotionListener{
 
         // Draws a coloured ball 
         gameBall.paint(g);
+        // Draws future ball
+        futureBall.paint(g);
         // Draws the paddles
         playerPaddle.paint(g);
         cpuPaddle.paint(g);
         // Draws line
-        line.drawLine(g);
-
-        
+        line.drawLine(g);      
         // update score
         g.setColor(Color.WHITE);
         g.setFont(game_font);
+
         // the drawString method needs a String to print, and a location to print it at.
         g.drawString(playerScore +"  "+ cpuScore,255 , 35);
     }
@@ -152,9 +162,9 @@ public class PongGame extends JPanel implements MouseMotionListener{
 	// reset ball
     gameBall.setX(300);
     gameBall.setY(200);
-    gameBall.setDx(3);
-    gameBall.setDy(3);
-    gameBall.setSpeed(6);
+    gameBall.setDx(5);
+    gameBall.setDy(5);
+    gameBall.setSpeed(3);
     bounceCount = 0;
 }
 }

@@ -62,5 +62,9 @@ public class Paddle {
         //if we get here, one of the checks failed, and the ball has not collided
         return false;
     }
+
+    public int getX(){
+        return x;
+    }
     
 }

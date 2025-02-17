@@ -30,6 +30,19 @@ public class Ball {
         this.size = size;
     }
 
+    // Copy Constructor
+    public Ball(Ball b){
+        this.x = b.x;
+        this.y = b.y;
+
+        this.dx = b.dx;
+        this.dy = b.dy;
+
+        this.speed = b.speed;
+        this.color = Color.DARK_GRAY;
+        this.size = b.size;
+    }
+
     public void paint(Graphics g){
         // set brush to ball colour defined in the constructor
         g.setColor(color);
@@ -48,12 +61,12 @@ public class Ball {
     public void bounceOffEdges(int top, int bottom){ 
         // Checks if  Y is at the bottom of screen
         if(y > bottom - size){
-            randomBallColour();
+            //randomBallColour();
             reverseY();
         }
         // Checks if y is at the top of screen
         else if(y < top){
-            randomBallColour();
+            //randomBallColour();
             reverseY();
         }
     }

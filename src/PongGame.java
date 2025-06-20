@@ -2,9 +2,12 @@
 //Libraries needed for window drawing
 import javax.swing.*;
 import java.awt.*;
+
 // For Mouse Input, and position
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
+
+// For graphics, scaling and transformations
 import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,10 +27,10 @@ public class PongGame extends JPanel implements MouseMotionListener {
     // Keeps track of score for Player and Computer
     private int playerScore;
     private int cpuScore;
-    
+
     // Score which player or cpu wins
-    private final int WIN_SCORE = 1;
-    // Tracks the amount of times the ball has bounces
+    private final int WIN_SCORE = 3;
+    // Tracks the amount of times the ball has bounced
     private int bounceCount;
 
     // Variable to load Special font
@@ -46,26 +49,26 @@ public class PongGame extends JPanel implements MouseMotionListener {
     private boolean transitionTriggered = false;
     // Tracks the game state to stop game logic if score is met
     private boolean PLAYING;
-    
+
     // Creates constructor for PongGame
     public PongGame(JFrame parentFrame) {
         // inherits JFrame needed to do transition on game window
         this.parentFrame = parentFrame;
 
         // Instantiates instances of needed game objects
-        this.gameBall = new Ball(300, 200, 4, 4, 3, Color.WHITE, 10);
+        this.gameBall = new Ball(300, 200, 3, 3, 3, Color.WHITE, 10);
         this.playerPaddle = new Paddle(10, 200, 65, 5, Color.WHITE);
         this.cpuPaddle = new Paddle(610, 200, 65, 5, Color.WHITE);
 
         // Draws line seperating player and cpu
         this.line = new Line(WINDOW_WIDTH / 2, 0, WINDOW_HEIGHT, 3, Color.WHITE);
 
-        //important variables to track different values in game
+        // important variables to track different values in game
         this.playerMouseY = 0;
         this.playerScore = 0;
         this.cpuScore = 0;
         this.bounceCount = 0;
-        // sets play state 
+        // sets play state
         this.PLAYING = true;
 
         this.sfx = new SoundPlayer();
@@ -75,7 +78,6 @@ public class PongGame extends JPanel implements MouseMotionListener {
         sfx.loadSound("ScoreUp", "sfx/ScoreUp.wav");
         sfx.loadSound("GameOver", "sfx/GameOver.wav");
         sfx.loadSound("YouWin", "sfx/YouWin.wav");
-
 
         // sets up an event listener for mouse on this object
         addMouseMotionListener(this);
@@ -95,7 +97,6 @@ public class PongGame extends JPanel implements MouseMotionListener {
         // starts background music
         sfx.play("Alert");
     }
-
 
     public int getPlayerScore() {
         return this.playerScore;
@@ -127,6 +128,14 @@ public class PongGame extends JPanel implements MouseMotionListener {
 
     public Transitions getWinLoseScreen() {
         return winLoseScreen;
+    }
+
+    public void closeAfterDelay(int millis) {
+        Timer closeTimer = new Timer(5000, e -> {
+            this.parentFrame.dispose(); // Closes the game window
+        });
+        closeTimer.setRepeats(false);
+        closeTimer.start();
     }
 
     /* Method handling games physics , called each frame */
@@ -182,7 +191,7 @@ public class PongGame extends JPanel implements MouseMotionListener {
 
             sfx.play("YouWin");
             winLoseScreen.endScreen("YOU WIN", this.parentFrame, this);
-
+            closeAfterDelay(5000);
         }
 
         else if (getCPUScore() == getWinScore() && !transitionTriggered) {
@@ -197,14 +206,16 @@ public class PongGame extends JPanel implements MouseMotionListener {
             } catch (InterruptedException ex) {
                 ex.printStackTrace();
             }
-            sfx.play("GameOver");
-            winLoseScreen.endScreen("GAME OVER", this.parentFrame, this);
 
+            // Plays game over music
+            sfx.play("GameOver");
+            // Displays MGS1 style game over transition
+            winLoseScreen.endScreen("GamE OveR", this.parentFrame, this);
+            closeAfterDelay(5000);
         }
 
     }
 
-    
     /* Method to update and draw all graphics to screen */
     @Override
     public void paintComponent(Graphics g) {

@@ -14,7 +14,6 @@ public class Main {
         window.setIconImage(icon.getImage());
         // Sets up window exiting
         window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-
         /*
          * The size of the game will be 480x640, the size of the JFrame needs to be
          * slightly larger

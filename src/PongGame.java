@@ -1,144 +1,248 @@
+
 //Libraries needed for window drawing
 import javax.swing.*;
 import java.awt.*;
 // For Mouse Input, and position
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
-import java.io.File;
+import java.awt.geom.AffineTransform;
 import java.io.IOException;
- 
-public class PongGame extends JPanel implements MouseMotionListener{
-// Sets up window dimension constants
+import java.io.InputStream;
+
+public class PongGame extends JPanel implements MouseMotionListener {
+    // Sets up window dimension constants
     static final int WINDOW_WIDTH = 640, WINDOW_HEIGHT = 480;
-// Sets up a Ball object to be created
+
+    // Sets up a Ball object to be created
     private Ball gameBall;
-// Sets up player and CPU paddle
+    // Sets up player and CPU paddle
     private Paddle playerPaddle, cpuPaddle;
-// Variable to track Y co-ord of mouse
+
+    // Variable to track Y co-ord of mouse
     private int playerMouseY;
-// Keeps track of score
-    public static int playerScore, cpuScore;
-// Score which player or cpu wins
-    static final int WIN_SCORE = 5;
-// Tracks the amount of times the ball has bounces
-    private int bounceCount; 
-// Variable to load Special font
+
+    // Keeps track of score for Player and Computer
+    private int playerScore;
+    private int cpuScore;
+    
+    // Score which player or cpu wins
+    private final int WIN_SCORE = 1;
+    // Tracks the amount of times the ball has bounces
+    private int bounceCount;
+
+    // Variable to load Special font
     private Font game_font;
-// Line seperating player and cpu player 
+    // Line seperating player and cpu player
     private Line line;
-// Paddle sound
-    public Music ballNoise;
-//Background Music
-    private Music bgm;
-// Sound when score increases
-    private Music scoreUp;
-     
-    /*Method handling games physics , called each frame */
-    public void gameLogic(){
-        gameBall.moveBall();
-    // check for edges to bounce ball off
-        gameBall.bounceOffEdges(0, WINDOW_HEIGHT);
-    // move the paddle towards the y Pos of the mouse 
-        playerPaddle.moveTowards(playerMouseY);
-    // Computer moves ball towards y pos of ball
-        cpuPaddle.moveTowards(gameBall.getY());
 
-        if(playerPaddle.checkCollision(gameBall) || cpuPaddle.checkCollision(gameBall)){
-            ballNoise.playSound();
-            gameBall.reverseX();
-            bounceCount++;
-        }
+    // Sets up object that plays any given sound effect
+    SoundPlayer sfx;
+    // Sets up Win / Lose Screen
+    private Transitions winLoseScreen;
+    // Allows Parent window to be passed into constructor for transition
+    private JFrame parentFrame;
 
-// after 5 bounces
-    if (bounceCount == 5){
-        // reset counter
-        bounceCount = 0;
-        gameBall.increaseSpeed();
-    }
-
-// check if cpu has scored
-    if(gameBall.getX() < 0){
-        //player has lost
-        cpuScore++;
-        scoreUp.playSound();
-        gameBall.setBallColour(Color.YELLOW);
-        reset();
-    }
-// check if player has score
-    else if(gameBall.getX() > WINDOW_WIDTH){
-        playerScore++;
-        scoreUp.playSound();
-        reset();
-    }
-
-    }
+    // Flag to track if transition has been triggered
+    private boolean transitionTriggered = false;
+    // Tracks the game state to stop game logic if score is met
+    private boolean PLAYING;
+    
     // Creates constructor for PongGame
-    public PongGame(){
+    public PongGame(JFrame parentFrame) {
+        // inherits JFrame needed to do transition on game window
+        this.parentFrame = parentFrame;
+
         // Instantiates instances of needed game objects
-        gameBall = new Ball(300, 200, 4, 4, 3, Color.WHITE, 10);
-        playerPaddle = new Paddle(10,200,65,5,Color.WHITE);
-        cpuPaddle = new Paddle(610,200,65,5,Color.WHITE);   
+        this.gameBall = new Ball(300, 200, 4, 4, 3, Color.WHITE, 10);
+        this.playerPaddle = new Paddle(10, 200, 65, 5, Color.WHITE);
+        this.cpuPaddle = new Paddle(610, 200, 65, 5, Color.WHITE);
 
         // Draws line seperating player and cpu
-        line = new Line(WINDOW_WIDTH / 2, 0, WINDOW_HEIGHT, 3, Color.WHITE);
+        this.line = new Line(WINDOW_WIDTH / 2, 0, WINDOW_HEIGHT, 3, Color.WHITE);
 
-        // Sets up ball sfx
-        ballNoise = new Music("sfx/BallNoise.wav");
+        //important variables to track different values in game
+        this.playerMouseY = 0;
+        this.playerScore = 0;
+        this.cpuScore = 0;
+        this.bounceCount = 0;
+        // sets play state 
+        this.PLAYING = true;
 
-        // Sets up background music
-        bgm = new Music("sfx/Alert.wav");
-        bgm.playLoopedSound();
+        this.sfx = new SoundPlayer();
+        // Preloads and caches all sounds to be played later
+        sfx.loadSound("Alert", "sfx/Alert.wav");
+        sfx.loadSound("Bounce", "sfx/Bounce.wav");
+        sfx.loadSound("ScoreUp", "sfx/ScoreUp.wav");
+        sfx.loadSound("GameOver", "sfx/GameOver.wav");
+        sfx.loadSound("YouWin", "sfx/YouWin.wav");
 
-        // Sets up sound that plays when score increases
-        scoreUp = new Music("sfx/Coin.wav");
-
-        playerMouseY = 0;
-        playerScore = 0; 
-        cpuScore = 0;
-        bounceCount = 0;
 
         // sets up an event listener for mouse on this object
         addMouseMotionListener(this);
 
         // Exception to handle loading font
         try {
-            game_font = Font.createFont(Font.TRUETYPE_FONT, new File("fonts/MGS2MENU.TTF")).deriveFont(28f);
+            InputStream fontStream = getClass().getResourceAsStream("fonts/MGS2MENU.TTF");
+            game_font = Font.createFont(Font.TRUETYPE_FONT, fontStream).deriveFont(28f);
             GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
             ge.registerFont(game_font);
         } catch (IOException | FontFormatException e) {
             e.printStackTrace();
-            game_font= new Font("Arial", Font.PLAIN, 20); // Fallback font
+            game_font = new Font("Arial", Font.PLAIN, 20); // Fallback font
         }
+
+        this.winLoseScreen = new Transitions();
+        // starts background music
+        sfx.play("Alert");
     }
 
-    /*Method to update and draw all graphics to screen*/
+
+    public int getPlayerScore() {
+        return this.playerScore;
+    }
+
+    public int getCPUScore() {
+        return this.cpuScore;
+    }
+
+    public void setPlayState(boolean playState) {
+        this.PLAYING = playState;
+    }
+
+    public boolean getPlayingState() {
+        return this.PLAYING;
+    }
+
+    int getWinScore() {
+        return WIN_SCORE;
+    }
+
+    boolean getTransitionState() {
+        return this.transitionTriggered;
+    }
+
+    void setTransitionState(boolean state) {
+        this.transitionTriggered = state;
+    }
+
+    public Transitions getWinLoseScreen() {
+        return winLoseScreen;
+    }
+
+    /* Method handling games physics , called each frame */
+    public void gameLogic() {
+        if (!getPlayingState()) {
+            return;
+        }
+        gameBall.moveBall();
+        // check for edges to bounce ball off
+        gameBall.bounceOffEdges(0, WINDOW_HEIGHT);
+        // move the paddle towards the y Pos of the mouse
+        playerPaddle.moveTowards(playerMouseY);
+        // Computer moves ball towards y pos of ball
+        cpuPaddle.moveTowards(gameBall.getY());
+
+        if (playerPaddle.checkCollision(gameBall) || cpuPaddle.checkCollision(gameBall)) {
+            sfx.play("Bounce");
+            gameBall.reverseX();
+            bounceCount++;
+        }
+
+        // after 5 bounces
+        if (bounceCount == 5) {
+            // reset counter
+            bounceCount = 0;
+            gameBall.increaseSpeed();
+        }
+
+        // check if cpu has scored
+        if (gameBall.getX() < 0) {
+            sfx.play("ScoreUp");
+            this.cpuScore++;
+            reset();
+        }
+        // check if player has scored
+        else if (gameBall.getX() > WINDOW_WIDTH) {
+            sfx.play("ScoreUp");
+            this.playerScore++;
+            reset();
+        }
+
+        if (getPlayerScore() == getWinScore() && !transitionTriggered) {
+            sfx.stopAll();
+            reset();
+            setTransitionState(true);
+            setPlayState(false);
+            // pauses game briefly to give time to the transition
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }
+
+            sfx.play("YouWin");
+            winLoseScreen.endScreen("YOU WIN", this.parentFrame, this);
+
+        }
+
+        else if (getCPUScore() == getWinScore() && !transitionTriggered) {
+            sfx.stopAll();
+            reset();
+            setTransitionState(true);
+            setPlayState(false);
+
+            // pauses game briefly to give time to the transition
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }
+            sfx.play("GameOver");
+            winLoseScreen.endScreen("GAME OVER", this.parentFrame, this);
+
+        }
+
+    }
+
+    
+    /* Method to update and draw all graphics to screen */
     @Override
-    public void paintComponent(Graphics g){ 
+    public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        //Sets drawing colour to black
-        g.setColor(Color.BLACK);
+        Graphics2D g2d = (Graphics2D) g;
 
-        /*draws black rectangle from (0,0) to (800,600),
-        covering whole screen */ 
-        g.fillRect(0,0,WINDOW_WIDTH,WINDOW_HEIGHT);
+        // Calculate scaling factors based on design dimensions
+        double scaleX = getWidth() / 640.0;
+        double scaleY = getHeight() / 480.0;
 
-        // Draws a coloured ball 
-        gameBall.paint(g);
-        // Draws the paddles
-        playerPaddle.paint(g);
-        cpuPaddle.paint(g);
-        // Draws line
-        line.drawLine(g);      
-        // update score
-        g.setColor(Color.GREEN);
-        g.setFont(game_font);
+        // Save the original transform
+        AffineTransform oldTransform = g2d.getTransform();
 
-        // the drawString method needs a String to print, and a location to print it at.
-        g.drawString(playerScore +"  "+ cpuScore,255 , 35);
+        // Apply scaling transform
+        g2d.scale(scaleX, scaleY);
+
+        // Now draw everything using the design resolution coordinates
+        // Fill the background with black, for example
+        g2d.setColor(Color.BLACK);
+        g2d.fillRect(0, 0, 650, 495);
+
+        // Draw game objects (ball, paddles, line)
+        gameBall.paint(g2d);
+        playerPaddle.paint(g2d);
+        cpuPaddle.paint(g2d);
+        line.drawLine(g2d);
+
+        // Update the score text (adjust position based on design resolution)
+        g2d.setColor(Color.GREEN);
+        g2d.setFont(game_font);
+        g2d.drawString(playerScore + "  " + cpuScore, 255, 35);
+
+        // Restore the original transform so other UI components are not affected
+        g2d.setTransform(oldTransform);
     }
 
-  // Overides built in methods for MouseEvent  
-	@Override
+    // Overides built in methods for MouseEvent
+    @Override
     public void mouseDragged(MouseEvent e) {
 
     }
@@ -148,40 +252,20 @@ public class PongGame extends JPanel implements MouseMotionListener{
         playerMouseY = e.getY();
     }
 
-    public void reset(){      
-    // Pauses the game for 1 second 
-    try{
-        Thread.sleep(250);
-    }
-    catch(Exception e){
-        e.printStackTrace();
-    }
+    public void reset() {
+        // Pauses the game for 1 second
+        try {
+            Thread.sleep(250);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-	// reset ball
-    ballNoise.stopSound();
-    gameBall.setX(300);
-    gameBall.setY(200);
-    gameBall.setDx(5);
-    gameBall.setDy(5);
-    gameBall.setSpeed(3);
-    bounceCount = 0;
-    }
-
-    public void stopBGM(){
-        this.bgm.stopSound();
-    }
-
-    public void stopScoreSound(){
-        this.scoreUp.stopSound();
-    }
-
-    public void stopBallSound(){
-        this.ballNoise.stopSound();
-    }
-
-    public void stopAllSounds(){
-        stopBGM();
-        stopBallSound();
-        stopScoreSound();
+        // reset ball attributes
+        gameBall.setX(300);
+        gameBall.setY(200);
+        gameBall.setDx(5);
+        gameBall.setDy(5);
+        gameBall.setSpeed(3);
+        bounceCount = 0;
     }
 }

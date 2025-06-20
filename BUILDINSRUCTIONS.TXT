@@ -1,0 +1,12 @@
+1. cd into root of project
+2. javac -d bin src/*.java
+3. jar cfe bin/JavaPong.jar Main -C bin . sfx fonts icons
+4. cd bin && java -jar .\JavaPong.jar
+5. you can remove the resulting classfiles if you want to
+6. To run the code  not packaged as a .jar, move /fonts, /icons and /sfx into /src
+
+
+The project was orignally made with:
+openjdk 23.0.1 2024-10-15
+OpenJDK Runtime Environment Temurin-23.0.1+11 (build 23.0.1+11)
+OpenJDK 64-Bit Server VM Temurin-23.0.1+11 (build 23.0.1+11, mixed mode, sharing)

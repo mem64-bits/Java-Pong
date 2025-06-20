@@ -1,4 +1,3 @@
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -6,8 +5,8 @@ import java.awt.event.ActionListener;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
 import java.awt.geom.AffineTransform;
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 public class Transitions extends JPanel {
     private float progress = 0.0f; // Progress value for the transition
@@ -23,7 +22,8 @@ public class Transitions extends JPanel {
 
         // Load the custom font
         try {
-            customFont = Font.createFont(Font.TRUETYPE_FONT, new File("fonts/MGS1.ttf")).deriveFont(72f);
+            InputStream fontStream = getClass().getResourceAsStream("/fonts/MGS1.ttf");
+            customFont = Font.createFont(Font.TRUETYPE_FONT, fontStream).deriveFont(72f);
             GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
             ge.registerFont(customFont);
         } catch (IOException | FontFormatException e) {
@@ -32,10 +32,12 @@ public class Transitions extends JPanel {
         }
     }
 
-    public void endScreen(String message) {
-        this.message = message;
-        this.displayedMessage = "";
-        this.charIndex = 0;
+    public void endScreen(String message, JFrame window, PongGame game)  {
+        window.setVisible(false);
+        window.remove(game);
+        window.add(game.getWinLoseScreen());
+        window.setVisible(true);
+
         progress = 0.0f; // Reset progress
 
         // Timer for fade transition
@@ -69,44 +71,44 @@ public class Transitions extends JPanel {
     }
 
     @Override
-protected void paintComponent(Graphics g) {
-    super.paintComponent(g);
-    Graphics2D g2d = (Graphics2D) g;
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Graphics2D g2d = (Graphics2D) g;
 
-    // Interpolate between white and black based on progress
-    int red = (int) (255 * (1 - progress));
-    int green = (int) (255 * (1 - progress));
-    int blue = (int) (255 * (1 - progress));
-    Color transitionColor = new Color(red, green, blue);
+        // Interpolate between white and black based on progress
+        int red = (int) (255 * (1 - progress));
+        int green = (int) (255 * (1 - progress));
+        int blue = (int) (255 * (1 - progress));
+        Color transitionColor = new Color(red, green, blue);
 
-    g2d.setColor(transitionColor);
-    g2d.fillRect(0, 0, getWidth(), getHeight());
+        g2d.setColor(transitionColor);
+        g2d.fillRect(0, 0, getWidth(), getHeight());
 
-    // Draw the message
-    if (!displayedMessage.isEmpty()) {
-        g2d.setColor(Color.GREEN);
-        g2d.setFont(customFont); // Set the custom font
-        FontMetrics fm = g2d.getFontMetrics();
-        double totalWidth = fm.stringWidth(displayedMessage);
-        double x = (getWidth() - totalWidth) / 2;
-        double y = (getHeight() - fm.getHeight()) / 2 + fm.getAscent();
+        // Draw the message
+        if (!displayedMessage.isEmpty()) {
+            g2d.setColor(Color.GREEN);
+            g2d.setFont(customFont); // Set the custom font
+            FontMetrics fm = g2d.getFontMetrics();
+            double totalWidth = fm.stringWidth(displayedMessage);
+            double x = (getWidth() - totalWidth) / 2;
+            double y = (getHeight() - fm.getHeight()) / 2 + fm.getAscent();
 
-        // Draw each character individually with extra spacing
-        double extraSpacing = 7; // Adjust this value as needed
-        for (char c : displayedMessage.toCharArray()) {
-            String charStr = String.valueOf(c);
-            int charWidth = fm.stringWidth(charStr);
+            // Draw each character individually with extra spacing
+            double extraSpacing = 7; // Adjust this value as needed
+            for (char c : displayedMessage.toCharArray()) {
+                String charStr = String.valueOf(c);
+                int charWidth = fm.stringWidth(charStr);
 
-            // Draw wireframe text
-            FontRenderContext frc = g2d.getFontRenderContext();
-            TextLayout textLayout = new TextLayout(charStr, customFont, frc);
-            Shape outline = textLayout.getOutline(AffineTransform.getTranslateInstance(x, y));
-            g2d.setStroke(new BasicStroke(1.0f));
-            g2d.draw(outline);
+                // Draw wireframe text
+                FontRenderContext frc = g2d.getFontRenderContext();
+                TextLayout textLayout = new TextLayout(charStr, customFont, frc);
+                Shape outline = textLayout.getOutline(AffineTransform.getTranslateInstance(x, y));
+                g2d.setStroke(new BasicStroke(1.0f));
+                g2d.draw(outline);
 
-            x += charWidth + extraSpacing;
+                x += charWidth + extraSpacing;
+            }
         }
     }
-}   
-    
+
 }

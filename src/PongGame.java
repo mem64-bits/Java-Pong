@@ -1,20 +1,16 @@
 
 //Libraries needed for window drawing
-import javax.swing.*;
 import java.awt.*;
-
-// For Mouse Input, and position
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
-
-// For graphics, scaling and transformations
 import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.io.InputStream;
+import javax.swing.*;
 
 public class PongGame extends JPanel implements MouseMotionListener {
     // Sets up window dimension constants
-    static final int WINDOW_WIDTH = 640, WINDOW_HEIGHT = 480;
+    static final int WINDOW_WIDTH = 1920, WINDOW_HEIGHT = 1200;
 
     // Sets up a Ball object to be created
     private Ball gameBall;
@@ -56,9 +52,9 @@ public class PongGame extends JPanel implements MouseMotionListener {
         this.parentFrame = parentFrame;
 
         // Instantiates instances of needed game objects
-        this.gameBall = new Ball(300, 200, 3, 3, 3, Color.WHITE, 10);
-        this.playerPaddle = new Paddle(10, 200, 65, 5, Color.WHITE);
-        this.cpuPaddle = new Paddle(610, 200, 65, 5, Color.WHITE);
+        this.gameBall = new Ball((WINDOW_WIDTH / 2), (WINDOW_HEIGHT / 2), 4, 4, 3, Color.WHITE, 10);
+        this.playerPaddle = new Paddle(10, WINDOW_HEIGHT / 2, 65, 6, Color.WHITE);
+        this.cpuPaddle = new Paddle(WINDOW_WIDTH - 10 - 12, WINDOW_HEIGHT / 2, 65, 6, Color.WHITE);
 
         // Draws line seperating player and cpu
         this.line = new Line(WINDOW_WIDTH / 2, 0, WINDOW_HEIGHT, 3, Color.WHITE);
@@ -222,9 +218,13 @@ public class PongGame extends JPanel implements MouseMotionListener {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
 
+        // Enable antialiasing for better rendering on scaled displays
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+
         // Calculate scaling factors based on design dimensions
-        double scaleX = getWidth() / 640.0;
-        double scaleY = getHeight() / 480.0;
+        double scaleX = (double) getWidth() / WINDOW_WIDTH;
+        double scaleY = (double) getHeight() / WINDOW_HEIGHT;
 
         // Save the original transform
         AffineTransform oldTransform = g2d.getTransform();
@@ -235,7 +235,7 @@ public class PongGame extends JPanel implements MouseMotionListener {
         // Now draw everything using the design resolution coordinates
         // Fill the background with black, for example
         g2d.setColor(Color.BLACK);
-        g2d.fillRect(0, 0, 650, 495);
+        g2d.fillRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
         // Draw game objects (ball, paddles, line)
         gameBall.paint(g2d);
@@ -243,10 +243,28 @@ public class PongGame extends JPanel implements MouseMotionListener {
         cpuPaddle.paint(g2d);
         line.drawLine(g2d);
 
-        // Update the score text (adjust position based on design resolution)
+        // Draws the score text (adjust position based on design resolution)
         g2d.setColor(Color.GREEN);
         g2d.setFont(game_font);
-        g2d.drawString(playerScore + "  " + cpuScore, 255, 35);
+
+        // Calculate equal distance from center line
+        int scoreOffset = 60; // Distance from center line
+        int centerX = WINDOW_WIDTH / 2;
+
+        // Get font metrics to calculate text width for proper centering
+        FontMetrics fm = g2d.getFontMetrics();
+        String playerScoreStr = Integer.toString(playerScore);
+        String cpuScoreStr = Integer.toString(cpuScore);
+
+        // Calculate positions so text is equally spaced from center line
+        int playerScoreWidth = fm.stringWidth(playerScoreStr);
+        int playerScoreX = centerX - scoreOffset - playerScoreWidth; // Position so right edge is scoreOffset from
+                                                                     // center
+        int cpuScoreX = centerX + scoreOffset; // Position so left edge is scoreOffset from center
+
+        // Draws score to window
+        g2d.drawString(playerScoreStr, playerScoreX, 35);
+        g2d.drawString(cpuScoreStr, cpuScoreX, 35);
 
         // Restore the original transform so other UI components are not affected
         g2d.setTransform(oldTransform);
@@ -260,7 +278,9 @@ public class PongGame extends JPanel implements MouseMotionListener {
 
     @Override
     public void mouseMoved(MouseEvent e) {
-        playerMouseY = e.getY();
+        // Scale mouse coordinates to match the design resolution
+        double scaleY = (double) getHeight() / WINDOW_HEIGHT;
+        playerMouseY = (int) (e.getY() / scaleY);
     }
 
     public void reset() {
@@ -272,8 +292,8 @@ public class PongGame extends JPanel implements MouseMotionListener {
         }
 
         // reset ball attributes
-        gameBall.setX(300);
-        gameBall.setY(200);
+        gameBall.setX(WINDOW_WIDTH / 2);
+        gameBall.setY(WINDOW_HEIGHT / 2);
         gameBall.setDx(5);
         gameBall.setDy(5);
         gameBall.setSpeed(3);

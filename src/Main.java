@@ -1,5 +1,5 @@
 
-// Library for making windows
+// Java inbuilt library for making windows
 import javax.swing.*;
 // utility libraries for Timers, Colors, Input Handling and more
 import java.awt.event.ActionEvent;
@@ -19,15 +19,20 @@ public class Main {
          * slightly larger
          * In computer graphics x is across, y is down
          */
-        window.setSize(650, 495);
+        // Try using setPreferredSize instead of setSize
+        window.setPreferredSize(new java.awt.Dimension(1920, 1220));
+        window.pack();
+        // Puts window at the center of the screen
+        window.setLocationRelativeTo(null);
 
         // Instantiates PongGame object
         PongGame game = new PongGame(window);
         // Adds the extended PongGame class to JFrame
         window.add(game);
-
-        // Shows the window
+        // Shows the windowa
         window.setVisible(true);
+        // Disables window resizing
+        window.setResizable(false);
 
         // Sets up timer to repeat at around 60 fps (60fps is 16.67 ms a second)
         Timer timer = new Timer(16, new ActionListener() {

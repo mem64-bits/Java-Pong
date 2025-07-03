@@ -1,0 +1,11 @@
+{
+    "editor.fontSize": 17,
+    "terminal.integrated.fontLigatures.enabled": true,
+    "editor.fontFamily": "'JetBrains Mono NL SemiBold'",
+    "editor.inlayHints.enabled": "offUnlessPressed",
+    "java.project.sourcePaths": [
+        "src"
+    ],
+    "java.project.referencedLibraries": [],
+    "java.format.settings.url": ".vscode/java-formatter.xml"
+}
